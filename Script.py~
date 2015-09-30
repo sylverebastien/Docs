@@ -125,7 +125,7 @@ def traduction(seq,dic):
 #res=traduction(sequence,tablerna)
 #print res
 
-def tradallseq(seq,dic):
+def trad0(seq,dic):
 	res=''
 	for i in range(0,len(seq),3):
 		res+=dic[seq[i:i+3]]
