@@ -110,6 +110,7 @@ def traduction(seq,dic):
 		if seq[i:i+3]=="AUG":
 			Debut=1
 			if dic[seq[i:i+3]]=="*":
+				res+=dic[seq[i:i+3]]
 				break
 			else:
 				res+=dic[seq[i:i+3]]
@@ -125,7 +126,7 @@ def traduction(seq,dic):
 #res=traduction(sequence,tablerna)
 #print res
 
-def trad0(seq,dic):
+def tradallseq(seq,dic):
 	res=''
 	for i in range(0,len(seq),3):
 		res+=dic[seq[i:i+3]]
@@ -142,10 +143,10 @@ def nbe_substitutions(sequence1,sequence2):
 			nbesubstitutions=nbesubstitutions+1
 	return nbesubstitutions
 
-seq1="GAGCCTACTAACGGGAT"
-seq2="CATCGTAATGACGGCCT"
-HAMM=nbe_substitutions(seq1,seq2)
-print HAMM
+#seq1=""
+#seq2=""
+#HAMM=nbe_substitutions(seq1,seq2)
+#print HAMM
 
 
 
@@ -163,10 +164,10 @@ def fibonacci(mois,reproduction):
 		nbetot.append(totrab)
 	return nbetot
 
-mois=5
-repro=3
-fibo=fibonacci(mois,repro)
-print fibo
+#mois=32
+#repro=3
+#fibo=fibonacci(mois,repro)
+#print fibo
 
 
 
@@ -176,42 +177,83 @@ def mendelian(k,m,n):
 	tot=k+m+n
 	proba=0.0
 	proba=((k*k-k)+(0.75*(m*m-m))+k*m*2+k*n*2+(0.5*(m*n*2)))/(tot*(tot-1))
-	return "%.4f" % proba
+	return "%.5f" % proba
 
-k=2.0
-m=2.0
-n=2.0
-mendel=mendelian(k,m,n)
-print mendel
+#k=23.0
+#m=28.0
+#n=27.0
+#mendel=mendelian(k,m,n)
+#print mendel
 
 
 
 ## RNA Splicing : splc
 
-test="ATGGTCTACATAGCTGACAAACAGCACGTAGCAATCGGTCGAATCTCGAGAGGCATATGGTCACATGATCGGTCGAGCGTGTTTCAAAGTTTGCGCCTAG"
-introns1="ATCGGTCGAA"
-introns2="ATCGGTCGAGCGTGT"
+#Attention ligne de la sequence en 1 seule ligne sans retour
 
-#def rna_splicing(sequence,introns):
-nointron1=test.replace(introns1,"")
-nointron2=nointron1.replace(introns2,"")
+def rna_splicing_file(fichier):
+	lignes=[]	
+	seq=""
+	introns=[]
+	f = open(fichier, 'r')
+	for line in f:
+		lignes.append(line.rstrip())
+	print len(lignes)
+	for i in range(len(lignes)):
+		if lignes[i][0]!='>':
+			if i==1:
+				seq=lignes[i]
+			else:
+				introns.append(lignes[i])
+	print seq
+	print len(introns)
+	for j in introns:
+		seq=seq.replace(j,"")
+	transseq=transcription(seq)
+	tradseq=tradallseq(transseq,tablerna)
+	f.close()
+	return tradseq
 
-print nointron1
-print nointron2
-exon=nointron2
+#res=rna_splicing_file("test_splc.txt")
+#print res
 
-test2=exon.upper()
-reptest=""
-for i in test2:
-	if (i=='A' or i=='G' or i=='C'):
-		reptest=reptest+i
-	elif i=='T':
-		reptest=reptest+"U"
 
-print reptest
 
-res=traduction(reptest,tablerna)
-print res
+##GC content
+
+#Attention ligne des sequences en 1 seule ligne sans retour
+
+def gc_content_file(fichier):
+	lignes=[]
+	noms_seq=[]
+	seqall=[]
+	gcall=[]
+	res2=[]
+	f = open(fichier, 'r')
+	for line in f:
+		lignes.append(line.rstrip())
+	i=0
+	while i<=(len(lignes)-2):
+		noms_seq.append(lignes[i])
+		seqall.append(lignes[i+1])
+		i=i+2
+	for j in seqall:
+		longueur=len(j)
+		nbeGC=0.0
+		for nt in j:
+			if nt=="G" or nt=="C":
+				nbeGC=nbeGC+1.0
+		resgc=nbeGC/longueur*100
+		pourcentage="%.6f" % resgc
+		gcall.append(pourcentage)
+	numero=gcall.index(max(gcall))
+	res2.append(noms_seq[numero])
+	res2.append(gcall[numero])
+	f.close()
+	return res2
+
+#res2=gc_content_file("test_gc.txt")
+#print res2
 
 
 
@@ -225,12 +267,63 @@ orfr=reverse_complement(test)
 orfr1=transcription(orfr)
 orfr2=orfr1[1:-2]
 orfr3=orfr1[2:-1]
-orfall=[]
+#orfall=[]
+#for i in orff1,orff2,orff3,orfr1,orfr2,orfr3:
+#	orfall.append(traduction(i,tablerna))
+#
+#orfall
+
+orfall2=[]
 for i in orff1,orff2,orff3,orfr1,orfr2,orfr3:
-	orfall.append(traduction(i,tablerna))
+	orfall2.append(tradallseq(i,tablerna))
 
-orfall
+orfall2
+
+orfallpos=[]
+for i in orfall2:
+	print i
+	posdebut=pos_motifs_repetes(i,"M")
+	print posdebut
+	posfin=pos_motifs_repetes(i,"*")
+	orfallpos.append(posdebut)
+	orfallpos.append(posfin)
+
+orfallpos
 
 
+
+##Fibo2 : rabbits 2 : fibd
+
+def fibonacci2(duree,survie):
+	Rabbitsdead=0
+	Child=1
+	Adults=[]
+	Adultsall=0
+	nbetot=[]
+	for nbe in range(survie-1):
+		Adults.append([0])
+	print Adults
+	for i in range(2,duree+1):
+		Rabbitsdead=Rabbitsdead+Adults[-1][-1]
+		print Rabbitsdead
+		for j in reversed(range(len(Adults))):
+			Adults[j].append(Adults[j-1][-1])
+		Adults[0].append(Child)
+		#Twoyear=Oneyear
+		#Oneyear=Child
+		for k in range(len(Adults)-1):
+			Adultsall=Adultsall+Adults[k][-1]
+		#Adults=Oneyear+Twoyear
+		Child=Adultsall
+		totrab=Child+Adultsall
+		nbetot.append(totrab)
+		print Adults
+		print "fin mois"
+	return nbetot
+
+duree=6
+survie=3
+fibo=fibonacci2(duree,survie)
+print fibo
 
 
