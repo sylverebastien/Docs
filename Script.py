@@ -259,72 +259,152 @@ def gc_content_file(fichier):
 
 ##ORF
 
-test="AGCCATGTAGCTAACTCAGGTTACATGGGGATGACCCCGCGACTTGGATTAGAGTCTCTTTTGGAATAAGCCTGAATGATCCGAGTAGCATCTCAG"
-orff1=transcription(test)
-orff2=orff1[1:-2]
-orff3=orff1[2:-1]
-orfr=reverse_complement(test)
-orfr1=transcription(orfr)
-orfr2=orfr1[1:-2]
-orfr3=orfr1[2:-1]
-#orfall=[]
-#for i in orff1,orff2,orff3,orfr1,orfr2,orfr3:
-#	orfall.append(traduction(i,tablerna))
-#
-#orfall
+def orf_finder(seq):
+	orff1=transcription(seq)
+	orff2=orff1[1:-2]
+	orff3=orff1[2:-1]
+	orfr=reverse_complement(seq)
+	orfr1=transcription(orfr)
+	orfr2=orfr1[1:-2]
+	orfr3=orfr1[2:-1]
+	orfall2=[]
+	for i in orff1,orff2,orff3,orfr1,orfr2,orfr3:
+		orfall2.append(tradallseq(i,tablerna))
+	orfallposdeb=[]
+	orfallposfin=[]
+	for i in orfall2:
+		posdebut=[pos for pos, char in enumerate(i) if char == "M"]
+		posfin=[pos for pos, char in enumerate(i) if char == "*"]
+		orfallposdeb.append(posdebut)
+		orfallposfin.append(posfin)
+	seqorf=[]
+	for i in range(len(orfall2)):
+		if orfallposdeb[i]!=[] or orfallposfin[i]!=[]:
+			for j in range(len(orfallposfin[i])):
+				for k in range(len(orfallposdeb[i])):
+					if orfallposdeb[i][k]<orfallposfin[i][j]:
+						if (orfall2[i][orfallposdeb[i][k]:orfallposfin[i][j]] not in seqorf) and ("*" not in orfall2[i][orfallposdeb[i][k]:orfallposfin[i][j]]):
+								seqorf.append(orfall2[i][orfallposdeb[i][k]:orfallposfin[i][j]])
+	return seqorf
 
-orfall2=[]
-for i in orff1,orff2,orff3,orfr1,orfr2,orfr3:
-	orfall2.append(tradallseq(i,tablerna))
-
-orfall2
-
-orfallpos=[]
-for i in orfall2:
-	print i
-	posdebut=pos_motifs_repetes(i,"M")
-	print posdebut
-	posfin=pos_motifs_repetes(i,"*")
-	orfallpos.append(posdebut)
-	orfallpos.append(posfin)
-
-orfallpos
+#seqtest="AGCCATGTAGCTAACTCAGGTTACATGGGGATGACCCCGCGACTTGGATTAGAGTCTCTTTTGGAATAAGCCTGAATGATCCGAGTAGCATCTCAG"
+#test=orf_finder(seqtest)
+#print test
 
 
 
 ##Fibo2 : rabbits 2 : fibd
 
-def fibonacci2(duree,survie):
-	Rabbitsdead=0
-	Child=1
-	Adults=[]
+def fibo2(duree,survie):
+	Rabbits=[[1]]
 	nbetot=[]
-	for nbe in range(survie-1):
-		Adults.append([0])
-	print Adults
+	for nbe in range(1,survie+1):
+		Rabbits.append([0])
 	for i in range(2,duree+1):
-		Adultsall=0
-		Rabbitsdead=Rabbitsdead+Adults[-1][-1]
-		print Rabbitsdead
-		for j in reversed(range(len(Adults))):
+		for j in reversed(range(len(Rabbits))):
 			if j-1>=0:
-				Adults[j].append(Adults[j-1][-1])
-		Adults[0].append(Child)
-		#Twoyear=Oneyear
-		#Oneyear=Child
-		for k in range(len(Adults)):
-			Adultsall=Adultsall+Adults[k][-1]
-		#Adults=Oneyear+Twoyear
-		Child=Adultsall
-		totrab=Child+Adultsall
-		nbetot.append(totrab)
-		print Adults
-		print "fin mois"
-	return nbetot
+				Rabbits[j].append(Rabbits[j-1][-1])
+		nvrabbits=0
+		for k in range(1,len(Rabbits)-1):
+			nvrabbits=nvrabbits+Rabbits[k][-2]
+		Rabbits[0].append(nvrabbits)
+	for l in range(len(Rabbits[0])):
+		nbe=0
+		for m in range(len(Rabbits)-1):
+			nbe=nbe+Rabbits[m][l]
+		nbetot.append(nbe)
+	return nbetot	
 
-duree=6
-survie=3
-fibo=fibonacci2(duree,survie)
-print fibo
+#duree=6
+#survie=3
+#fibo=fibo2(duree,survie)
+#print fibo
+
+
+
+##File modif
+
+def modif_fichier(fichier1,fichier2):
+	f1 = open(fichier1, 'r')
+	f2 = open(fichier2, 'w')
+	sequence=""
+	for line in f1:
+		if line[0]==">":
+			if sequence!="":
+				f2.write(sequence+"\n")
+			f2.write(line)
+			sequence=""
+		else:
+			sequence=sequence+line.rstrip()
+	f2.write(sequence)
+	f1.close()
+	f2.close()
+
+modif_fichier("test.txt","res_test.txt")
+
+
+
+
+##Consensus : cons
+
+def consensus(fichier1):
+	f1 = open(fichier1, 'r')
+	matnt=["A","C","G","T"]
+	sequences=[]
+	seqconsensus=""
+	nbe_A="A: "
+	nbe_C="C: "
+	nbe_G="G: "
+	nbe_T="T: "
+	for line in f1:
+		if line[0]!=">":
+			sequences.append(line)
+	for i in range(len(sequences[0])-1):
+		matrice=[]
+		nbeA=0;nbeC=0;nbeG=0;nbeT=0;
+		for j in range(len(sequences)):
+			if sequences[j][i]=="A":
+				nbeA=nbeA+1
+			if sequences[j][i]=="C":
+				nbeC=nbeC+1
+			if sequences[j][i]=="G":
+				nbeG=nbeG+1
+			if sequences[j][i]=="T":
+				nbeT=nbeT+1
+		matrice.extend((nbeA,nbeC,nbeG,nbeT))
+		seqconsensus=seqconsensus+matnt[matrice.index(max(matrice))]
+		nbe_A=nbe_A+str(nbeA)+" ";nbe_C=nbe_C+str(nbeC)+" ";nbe_G=nbe_G+str(nbeG)+" ";nbe_T=nbe_T+str(nbeT)+" ";
+	print seqconsensus
+	print nbe_A;print nbe_C;print nbe_G;print nbe_T;
+	f1.close()
+
+
+#modif_fichier("test.txt","res_test.txt")
+#constest=consensus("res_test.txt")
+
+
+
+##revp
+
+
+test="TCAATGCATGCGGGTCTATATGCAT"
+test2=reverse_complement(test)
+print test
+print test2
+
+f1 = open("lol.txt", 'w')
+for i in range(len(test)-1):
+	pos=[]
+	length=[]
+	for j in range(4,13):
+		if test[i:i+j] in test2 and test[i:i+j]!=test[i:i+j+1]:
+			pos.append(i+1)
+			length.append(j)
+	if pos!=[] and length!=[]:
+		f1.write(str(pos[-1])+" "+str(length[-1])+"\n")
+
+f1.close()
+
+
 
 
