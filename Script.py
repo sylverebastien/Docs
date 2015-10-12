@@ -387,17 +387,19 @@ def consensus(fichier1):
 ##revp
 
 
-test="TCAATGCATGCGGGTCTATATGCAT"
+test="ATATTCGTAGGTGATTATGGTTCAACCAGACCAACGGCGTTGCGGGAGGGGAACAGAGTGAGGTGGAGTATACCCTTCTGACTCCAGGGCGGGTGTAACATGGTCCTAAATGCGGTGTACTTGCATACACCGGTGCCTGTTCTAATATCTGGATCCCAGTCGTGCTTCCACGATAGCAAATAACGTTAACAGGGAAGTACCCTGTTGAAGTCGACATCGGTACGGGCTTGACCTACGTGAACTGGCGAAGCGAGAACCGCGTTGGACGAATTGCCCTCGAGGCTGCAAAAGTAATACTGCTTCTTGTGCATGTCCCCAGTTAATTATCGAGTCGCATTATGGACCTATGCTTGTCTGCCCGAGATTCACAGTGATGGCAAGATCAGGCACAGGTTGATGCTTTAACTGTTATGGTGTGCACTTAAACTCCCGGCCGGGACTAGGAGATAACGGATGGTTGTTTTGTTCTTGACGAATGGCGTTGCGTGGTGTAATACGCATTCGTTTTGGGGCACTGACACATGGGTATCTGGATAATGATCTGTAGTTACACATCCACGAAACAATCTTGTGTGTCTCTAGATAACCACAGCAACTACTGACTCCCTGCGGAATATCTATAGCGACCCAGCACGACTGTATAGCCTTACCGTCCAAGACGCCGTTATTTACTTGAGTATCTCTTTACAGGTGGCAGTCTTCAATGAATAACGGGACGTCCTTCTCTCCTGGGAATTGCGGTAGCCGTGTCAATCTCGGATGGGGAACCTTCCTGTGCATCCTCTTCATGCGCAGAATTTTCTTCTATGCAACCGTTTGCCACTGGTCGAGTCGGTCTACGAGCCGCGTGAGGGCTGCGCGCTATA"
 test2=reverse_complement(test)
-print test
-print test2
 
-f1 = open("lol.txt", 'w')
-for i in range(len(test)-1):
+f1 = open("resultat.txt", 'w')
+for i in range(len(test)-4):
 	pos=[]
 	length=[]
 	for j in range(4,13):
-		if test[i:i+j] in test2 and test[i:i+j]!=test[i:i+j+1]:
+		if i==0:
+			if (test[i:i+j]!=test[i:i+j+1] or i+j<=len(test)) and test[i:i+j]==test2[-(i+j):]:
+				pos.append(i+1)
+				length.append(j)
+		if (test[i:i+j]!=test[i:i+j+1] or i+j<=len(test)) and test[i:i+j]==test2[-(i+j):-i]:
 			pos.append(i+1)
 			length.append(j)
 	if pos!=[] and length!=[]:
@@ -406,5 +408,196 @@ for i in range(len(test)-1):
 f1.close()
 
 
+
+##overlap graphs : grph
+
+modif_fichier("test_grph.txt","test_grph2.txt")
+noms=[]
+seqall=[]
+f1 = open("test_grph2.txt", 'r')
+f2 = open("resultat_grph.txt", 'w')
+for line in f1:
+	if line[0]==">":
+		noms.append(line[1:].rstrip())
+	else:
+		seqall.append(line.rstrip())
+
+print noms
+print seqall
+for i in range(len(seqall)):
+	for j in range(len(seqall)):
+		if seqall[i][-3:]==seqall[j][0:3] and i!=j:
+			f2.write(noms[i]+" "+noms[j]+"\n")
+
+f1.close()
+f2.close()
+
+
+
+##protein mass table : prtm
+
+monoisotopic_table={'A':'71.03711','C':'103.00919','D':'115.02694','E':'129.04259','F':'147.06841','G':'57.02146','H':'137.05891','I':'113.08406','K':'128.09496','L':'113.08406','M':'131.04049','N':'114.04293','P':'97.05276','Q':'128.05858','R':'156.10111','S':'87.03203','T':'101.04768','V':'99.06841','W':'186.07931','Y':'163.06333'}
+
+seqprot="KPRIEFAAEWEFHMIHCHEQWQKVYRHGSPPLTMMNLFLVTQSTIFPVYTSFRSLPYLRFPWMLAWMWGVEDQTYSQVWVHVQGHWLSKPEERVYEDGYGDSSLRQNSAIKGPQFQEINSPINKRWQNGFTDQCTTRDNDGDRTTILFFHKLKCGLSAASFRPLKALSYDVGTIRADGQDAVTQVSCIRRCFRPGGCCAMVIMDLYYNFQDINYYTSAEAYLEGTPCEWCALTVSNWFTINSELRTYKLRYMKKHVWIKTIMCCCYGDNQFYLELNKKAEPMFFWRESNCFEGVMWEVTNNEEAFKCAHGIWQPSNWRLVHARLMCRLNSNAYPLTHYYIMQVALLHKRRTSYWMRPSNHMWLDYTCYIAMCSRYMKWLETRGPIPMQSHEKMKSSVPGATLSTSCHMAEFVDELCYKTSVRTDVCDKHPCGGTSMMVFQIRWGYCRWWISWTAMTLDDNQNDIHQNPDSAIKMYVIPWKFFVFGITDSHEICMFFRYLDDSIDSEFRVYTTTVLKEHLCYYVVLPSDMLWCKQFTPMDQMQCAKKNPTGRCIVKHDTICNKDVMDPSTLDTCDSDHREKWIPHQTYIMALAPATRALVIKPRDYQKKENVTWAVARYTDADWDEDIGLWSAGGNSNLGMMDNPMDYHNNFMHMFNYVRVMNFNLSWYYRDVSPDEWRAVWGNAVSITWGIYLDIPGQWMRMCRNDYSPMHIEKQLTYFPQTTLIYVHKFNLVGTSTYKQKKQNHNFAMATMRQIMQLNPEGHQEHGHVHKLRPNRIRTLQACTNHQELPFRACIMRTATMWEAAYWWCVCLARVLCGFTLNRVASSDHHEPKLKVPQLTLTAFWSSNGKDRVVYTFEWGPQTWGYKVTYTGMIMQTQCPLSWVQQFMTSVCAHKVWDCTAAFMLNQWLIRNEYQDCDEEPMIMEWVNIYKCPTAFPWQAIYYKWCAWRRFPSKRFRSPCVAHFQMRCHKQMQL"
+sommepoids=0.0
+for i in range(len(seqprot)):
+	sommepoids+=float(monoisotopic_table[seqprot[i]])
+
+print "%.3f" % sommepoids
+
+
+
+##Inferring mRNA from Protein : mrna
+
+seqprot=""
+seqprotall=seqprot+"*"
+nberna=1
+tablernaliste=list(tablerna.values())
+for i in range(1,len(seqprotall)):
+	valeur=0
+	for j in range(len(tablernaliste)):
+		if seqprotall[i]==tablernaliste[j]:
+			valeur+=1
+	nberna=nberna*valeur
+
+resmrna=nberna % 1000000
+print resmrna
+
+	
+
+##Finding a Shared Motif : lcsm
+
+modif_fichier("test_lcsm.txt","test_lcsm2.txt")
+seqall=[]
+motifall=[]
+motifcommun=[]
+motifuniq=""
+f1 = open("test_lcsm2.txt", 'r')
+for line in f1:
+	if line[0]!=">":
+		seqall.append(line.rstrip())
+
+for i in range(len(seqall[0])):
+	for j in range(100,101):
+		if seqall[0][i:i+j] not in motifall:
+			motifall.append(seqall[0][i:i+j])
+
+for motif in motifall:
+	nbe=0
+	for i in range(len(seqall)):
+		if motif in seqall[i] :
+			nbe+=1
+	if nbe==len(seqall) and motif not in motifcommun:
+		motifcommun.append(motif)
+
+nbe=0
+for i in range(len(motifcommun)):
+	if len(motifcommun[i])==100:
+		if nbe==0:
+			motifuniq=motifcommun[i]
+			nbe+=1
+		else:
+			motifuniq+=motifcommun[i][-1]
+
+f1.close()
+print motifuniq
+
+
+
+##Perfect Matchings and RNA Secondary Structures : pmch
+
+
+def fact(n):
+    x=1
+    for i in xrange(2,n+1):
+        x*=i
+    return x
+
+
+test="UAGGGCCUCCAGAUAGACCCGCGGGGCCCAGUAAUUGGAUCCUGUCAUGAUGAAGGUUCUACUCGAAUCC"
+nbeA=0
+nbeG=0
+resperfectmatch=0
+for i in range(len(test)):
+	if test[i]=='A':
+		nbeA+=1
+	if test[i]=='G':
+		nbeG+=1
+
+resperfectmatch=fact(nbeA)*fact(nbeG)
+print resperfectmatch
+
+
+
+##Completing a Tree : tree
+
+
+####LISTE ADJA A SORTED
+
+listeadja=[]
+f1=open("test_tree_sort.txt",'r')
+nbenoeuds=int(f1.readline().rstrip())
+for i in range(0,nbenoeuds):
+	listeadja.append([])
+
+text=f1.readlines()
+for i in range(len(text)):
+	ligne=text[i].rstrip().split(" ")
+	listeadja[int(ligne[0])-1].append(int(ligne[1])-1)
+
+f1.close()
+
+#nbenonoeuds=0
+#for i in range(len(listeadja)):
+#	if listeadja[i]==[]:
+#		valeur=0
+#		for j in range(len(listeadja)):
+#			if i+1 in listeadja[j]:
+#				valeur=1
+#		if valeur==0:
+#			nbenonoeuds+=1
+#
+#nbenonoeuds
+
+def BFS(g,v):
+	l=[]
+	l.append(v)
+	m=[]
+	chem=[]
+	for i in g:
+		m.append(0)
+	m[v]=1
+	while len(l) != 0:
+		s=l.pop(0)
+		chem.append(s)
+		for i in g[s]:
+			if m[i]==0:
+				l.append(i)
+				m[i]=1
+	return chem
+
+def comp_connexe_total(g):
+	listecomcon=[]
+	listesommets=[]
+	listesommets=range(len(g))
+	while len(listesommets) != 0:
+		listesombfs=BFS(g,listesommets[0])
+		listecomcon.append(listesombfs)
+		for i in listesombfs:
+			if i in listesommets:
+				listesommets.remove(i)
+	return listecomcon
+
+
+compograph=comp_connexe_total(listeadja)
+
+nbenoedges=0
+listenoedges=[]
+for i in range(len(compograph)):
+	if compograph[i][-1] not in listenoedges:
+		listenoedges.append(compograph[i][-1])
+		nbenoedges+=1
+
+print nbenoedges-1
 
 
