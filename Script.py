@@ -82,8 +82,8 @@ def pos_motifs_repetes(sequence,motif):
 	rep=""
 	longmotif=len(motif)
 	i=0
-	while i<=len(test)-len(motif):
-		allmotif.append(test[i:i+len(motif)])
+	while i<=len(sequence)-len(motif):
+		allmotif.append(sequence[i:i+len(motif)])
 		i=i+1
 	for numero in range(len(allmotif)):
 		if allmotif[numero]==motif:
@@ -92,10 +92,10 @@ def pos_motifs_repetes(sequence,motif):
 			rep=rep+" "
 	return rep
 
-test="CGAGAATCTCGACGGTAATCTCGAAAGTGATAATCTCGCGAATCTCGTAATCTCGAAATCTCG"
-motif="AATCTCGAA"
-posmotrep=pos_motifs_repetes(test,motif)
-print posmotrep
+#sequence="CGAGAATCTCGACGGTAATCTCGAAAGTGATAATCTCGCGAATCTCGTAATCTCGAAATCTCG"
+#motif="AATCTCGAA"
+#posmotrep=pos_motifs_repetes(sequence,motif)
+#print posmotrep
 
 
 
@@ -384,28 +384,33 @@ def consensus(fichier1):
 
 
 
-##revp
+##Locating Restriction Sites : revp
 
 
-test="ATATTCGTAGGTGATTATGGTTCAACCAGACCAACGGCGTTGCGGGAGGGGAACAGAGTGAGGTGGAGTATACCCTTCTGACTCCAGGGCGGGTGTAACATGGTCCTAAATGCGGTGTACTTGCATACACCGGTGCCTGTTCTAATATCTGGATCCCAGTCGTGCTTCCACGATAGCAAATAACGTTAACAGGGAAGTACCCTGTTGAAGTCGACATCGGTACGGGCTTGACCTACGTGAACTGGCGAAGCGAGAACCGCGTTGGACGAATTGCCCTCGAGGCTGCAAAAGTAATACTGCTTCTTGTGCATGTCCCCAGTTAATTATCGAGTCGCATTATGGACCTATGCTTGTCTGCCCGAGATTCACAGTGATGGCAAGATCAGGCACAGGTTGATGCTTTAACTGTTATGGTGTGCACTTAAACTCCCGGCCGGGACTAGGAGATAACGGATGGTTGTTTTGTTCTTGACGAATGGCGTTGCGTGGTGTAATACGCATTCGTTTTGGGGCACTGACACATGGGTATCTGGATAATGATCTGTAGTTACACATCCACGAAACAATCTTGTGTGTCTCTAGATAACCACAGCAACTACTGACTCCCTGCGGAATATCTATAGCGACCCAGCACGACTGTATAGCCTTACCGTCCAAGACGCCGTTATTTACTTGAGTATCTCTTTACAGGTGGCAGTCTTCAATGAATAACGGGACGTCCTTCTCTCCTGGGAATTGCGGTAGCCGTGTCAATCTCGGATGGGGAACCTTCCTGTGCATCCTCTTCATGCGCAGAATTTTCTTCTATGCAACCGTTTGCCACTGGTCGAGTCGGTCTACGAGCCGCGTGAGGGCTGCGCGCTATA"
-test2=reverse_complement(test)
-
-f1 = open("resultat.txt", 'w')
-for i in range(len(test)-4):
-	pos=[]
-	length=[]
-	for j in range(4,13):
-		if i==0:
-			if (test[i:i+j]!=test[i:i+j+1] or i+j<=len(test)) and test[i:i+j]==test2[-(i+j):]:
+def restriction_sites(fichier1,fichier2):
+	f1=open(fichier1, 'r')
+	nameseq=f1.readline().rstrip()
+	seq=f1.readline().rstrip()
+	f1.close()
+	seqreverse=reverse_complement(seq)
+	f2 = open(fichier2, 'w')
+	for i in range(len(seq)-3):
+		pos=[]
+		length=[]
+		for j in range(4,13):
+			if i==0:
+				if (seq[i:i+j]!=seq[i:i+j+1] or i+j<=len(seq)) and seq[i:i+j]==seqreverse[-(i+j):]:
+					pos.append(i+1)
+					length.append(j)
+			if (seq[i:i+j]!=seq[i:i+j+1] or i+j<=len(seq)) and seq[i:i+j]==seqreverse[-(i+j):-i]:
 				pos.append(i+1)
 				length.append(j)
-		if (test[i:i+j]!=test[i:i+j+1] or i+j<=len(test)) and test[i:i+j]==test2[-(i+j):-i]:
-			pos.append(i+1)
-			length.append(j)
-	if pos!=[] and length!=[]:
-		f1.write(str(pos[-1])+" "+str(length[-1])+"\n")
+		if pos!=[] and length!=[]:
+			f2.write(str(pos[-1])+" "+str(length[-1])+"\n")
+	f2.close()
 
-f1.close()
+#modif_fichier("test_revp.txt","test_revp2.txt")
+#restriction_sites("test_revp2.txt","res_revp2.txt")
 
 
 
@@ -438,32 +443,40 @@ f2.close()
 
 monoisotopic_table={'A':'71.03711','C':'103.00919','D':'115.02694','E':'129.04259','F':'147.06841','G':'57.02146','H':'137.05891','I':'113.08406','K':'128.09496','L':'113.08406','M':'131.04049','N':'114.04293','P':'97.05276','Q':'128.05858','R':'156.10111','S':'87.03203','T':'101.04768','V':'99.06841','W':'186.07931','Y':'163.06333'}
 
-seqprot="KPRIEFAAEWEFHMIHCHEQWQKVYRHGSPPLTMMNLFLVTQSTIFPVYTSFRSLPYLRFPWMLAWMWGVEDQTYSQVWVHVQGHWLSKPEERVYEDGYGDSSLRQNSAIKGPQFQEINSPINKRWQNGFTDQCTTRDNDGDRTTILFFHKLKCGLSAASFRPLKALSYDVGTIRADGQDAVTQVSCIRRCFRPGGCCAMVIMDLYYNFQDINYYTSAEAYLEGTPCEWCALTVSNWFTINSELRTYKLRYMKKHVWIKTIMCCCYGDNQFYLELNKKAEPMFFWRESNCFEGVMWEVTNNEEAFKCAHGIWQPSNWRLVHARLMCRLNSNAYPLTHYYIMQVALLHKRRTSYWMRPSNHMWLDYTCYIAMCSRYMKWLETRGPIPMQSHEKMKSSVPGATLSTSCHMAEFVDELCYKTSVRTDVCDKHPCGGTSMMVFQIRWGYCRWWISWTAMTLDDNQNDIHQNPDSAIKMYVIPWKFFVFGITDSHEICMFFRYLDDSIDSEFRVYTTTVLKEHLCYYVVLPSDMLWCKQFTPMDQMQCAKKNPTGRCIVKHDTICNKDVMDPSTLDTCDSDHREKWIPHQTYIMALAPATRALVIKPRDYQKKENVTWAVARYTDADWDEDIGLWSAGGNSNLGMMDNPMDYHNNFMHMFNYVRVMNFNLSWYYRDVSPDEWRAVWGNAVSITWGIYLDIPGQWMRMCRNDYSPMHIEKQLTYFPQTTLIYVHKFNLVGTSTYKQKKQNHNFAMATMRQIMQLNPEGHQEHGHVHKLRPNRIRTLQACTNHQELPFRACIMRTATMWEAAYWWCVCLARVLCGFTLNRVASSDHHEPKLKVPQLTLTAFWSSNGKDRVVYTFEWGPQTWGYKVTYTGMIMQTQCPLSWVQQFMTSVCAHKVWDCTAAFMLNQWLIRNEYQDCDEEPMIMEWVNIYKCPTAFPWQAIYYKWCAWRRFPSKRFRSPCVAHFQMRCHKQMQL"
-sommepoids=0.0
-for i in range(len(seqprot)):
-	sommepoids+=float(monoisotopic_table[seqprot[i]])
+def protein_mass(fichier1):
+	f1=open(fichier1, 'r')
+	seqprot=f1.readline().rstrip()
+	f1.close()
+	sommepoids=0.0
+	for i in range(len(seqprot)):
+		sommepoids+=float(monoisotopic_table[seqprot[i]])
+	return "%.3f" % sommepoids
 
-print "%.3f" % sommepoids
+#protein_mass("test_prtm.txt")
 
 
 
 ##Inferring mRNA from Protein : mrna
 
-seqprot=""
-seqprotall=seqprot+"*"
-nberna=1
-tablernaliste=list(tablerna.values())
-for i in range(1,len(seqprotall)):
-	valeur=0
-	for j in range(len(tablernaliste)):
-		if seqprotall[i]==tablernaliste[j]:
-			valeur+=1
-	nberna=nberna*valeur
+def mrna(fichier1):
+	f1=open(fichier1, 'r')
+	seqprot=f1.readline().rstrip()
+	f1.close()
+	seqprotall=seqprot+"*"
+	nberna=1
+	tablernaliste=list(tablerna.values())
+	for i in range(1,len(seqprotall)):
+		valeur=0
+		for j in range(len(tablernaliste)):
+			if seqprotall[i]==tablernaliste[j]:
+				valeur+=1
+		nberna=nberna*valeur
+	resmrna=nberna % 1000000
+	return resmrna
 
-resmrna=nberna % 1000000
-print resmrna
+mrna("test_mrna.txt")
 
-	
+
 
 ##Finding a Shared Motif : lcsm
 
@@ -477,6 +490,7 @@ for line in f1:
 	if line[0]!=">":
 		seqall.append(line.rstrip())
 
+f1.close()
 for i in range(len(seqall[0])):
 	for j in range(100,101):
 		if seqall[0][i:i+j] not in motifall:
@@ -499,7 +513,6 @@ for i in range(len(motifcommun)):
 		else:
 			motifuniq+=motifcommun[i][-1]
 
-f1.close()
 print motifuniq
 
 
@@ -513,51 +526,43 @@ def fact(n):
         x*=i
     return x
 
+def perfect_match(fichier1):
+	f1=open(fichier1,'r')
+	nomseq=f1.readline().rstrip()
+	seq=f1.readline().rstrip()
+	f&.close()
+	nbeA=0
+	nbeG=0
+	resperfectmatch=0
+	for i in range(len(seq)):
+		if seq[i]=='A':
+			nbeA+=1
+		if seq[i]=='G':
+			nbeG+=1
+	resperfectmatch=fact(nbeA)*fact(nbeG)
+	return resperfectmatch
 
-test="UAGGGCCUCCAGAUAGACCCGCGGGGCCCAGUAAUUGGAUCCUGUCAUGAUGAAGGUUCUACUCGAAUCC"
-nbeA=0
-nbeG=0
-resperfectmatch=0
-for i in range(len(test)):
-	if test[i]=='A':
-		nbeA+=1
-	if test[i]=='G':
-		nbeG+=1
-
-resperfectmatch=fact(nbeA)*fact(nbeG)
-print resperfectmatch
+#modif_fichier("test_pmch.txt","test_pmch2.txt")
+#perfect_match("test_pmch2.txt")
 
 
 
 ##Completing a Tree : tree
 
-
-####LISTE ADJA A SORTED
-
 listeadja=[]
-f1=open("test_tree_sort.txt",'r')
+f1=open("test_tree.txt",'r')
 nbenoeuds=int(f1.readline().rstrip())
-for i in range(0,nbenoeuds):
+for i in range(nbenoeuds):
 	listeadja.append([])
 
 text=f1.readlines()
 for i in range(len(text)):
 	ligne=text[i].rstrip().split(" ")
 	listeadja[int(ligne[0])-1].append(int(ligne[1])-1)
+	listeadja[int(ligne[1])-1].append(int(ligne[0])-1)
 
 f1.close()
 
-#nbenonoeuds=0
-#for i in range(len(listeadja)):
-#	if listeadja[i]==[]:
-#		valeur=0
-#		for j in range(len(listeadja)):
-#			if i+1 in listeadja[j]:
-#				valeur=1
-#		if valeur==0:
-#			nbenonoeuds+=1
-#
-#nbenonoeuds
 
 def BFS(g,v):
 	l=[]
@@ -576,6 +581,19 @@ def BFS(g,v):
 				m[i]=1
 	return chem
 
+
+def DFS(g,v):
+	p=[]
+	p.append(v)
+	chem=[]
+	while len(p) != 0:
+		s=p.pop(0)
+		if s not in chem:
+			chem.append(s)
+			for i in g[s]:
+				p.insert(0,i)
+	return chem
+
 def comp_connexe_total(g):
 	listecomcon=[]
 	listesommets=[]
@@ -591,13 +609,48 @@ def comp_connexe_total(g):
 
 compograph=comp_connexe_total(listeadja)
 
-nbenoedges=0
-listenoedges=[]
-for i in range(len(compograph)):
-	if compograph[i][-1] not in listenoedges:
-		listenoedges.append(compograph[i][-1])
-		nbenoedges+=1
+print len(compograph)-1
 
-print nbenoedges-1
+
+
+##Genome Assembly as Shortest Superstring : long
+
+modif_fichier("test_long.txt","test_long2.txt")
+f1 = open("test_long2.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=1
+while i<= len(text):
+	seqall.append(text[i].rstrip())
+	i+=2
+
+
+numseqdeb=0
+for i in range(len(seqall)):
+	test=0
+	for j in range(len(seqall)):
+		if seqall[i][:20] in seqall[j] and i!=j:
+			test+=1
+	if test==0:
+		numseqdeb=i
+
+seqassembly=seqall[numseqdeb]
+seqall.pop(numseqdeb)
+nbe=len(seqall)
+while nbe!=0:
+	for j in range(len(seqall)):
+		if seqassembly[-101:] in seqall[j]:
+			posmotif=pos_motifs_repetes(seqall[j],seqassembly[-101:])
+			valeurposmotif=int(posmotif.split(" ")[0])
+			seqassembly=seqassembly+seqall[j][valeurposmotif+100:]
+			del seqall[j]
+			break
+	nbe-=1
+
+f2 = open("res_test_long2.txt",'w')
+f2.write(seqassembly)
+f2.close()
+
 
 
