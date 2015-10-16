@@ -340,7 +340,8 @@ def modif_fichier(fichier1,fichier2):
 	f1.close()
 	f2.close()
 
-modif_fichier("test.txt","res_test.txt")
+
+#modif_fichier("test.txt","res_test.txt")
 
 
 
@@ -625,21 +626,134 @@ while i<= len(text):
 	seqall.append(text[i].rstrip())
 	i+=2
 
-seqassembly=seqall[0]
-seqall.pop(0)
+
+numseqdeb=0
+for i in range(len(seqall)):
+	test=0
+	for j in range(len(seqall)):
+		if seqall[i][:20] in seqall[j] and i!=j:
+			test+=1
+	if test==0:
+		numseqdeb=i
+
+seqassembly=seqall[numseqdeb]
+seqall.pop(numseqdeb)
 nbe=len(seqall)
 while nbe!=0:
 	for j in range(len(seqall)):
-		if seqassembly[-100:] in seqall[j]:
-			posmotif=pos_motifs_repetes(seqall[j],seqassembly[-100:])
+		if seqassembly[-101:] in seqall[j]:
+			posmotif=pos_motifs_repetes(seqall[j],seqassembly[-101:])
 			valeurposmotif=int(posmotif.split(" ")[0])
 			seqassembly=seqassembly+seqall[j][valeurposmotif+100:]
-			seqall.pop(j)
+			del seqall[j]
 			break
 	nbe-=1
 
 f2 = open("res_test_long2.txt",'w')
 f2.write(seqassembly)
+f2.close()
+
+
+
+##Creating a Distance Matrix : pdst
+
+
+modif_fichier("test_pdst.txt","test_pdst2.txt")
+f1 = open("test_pdst2.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=1
+while i<= len(text):
+	seqall.append(text[i].rstrip())
+	i+=2
+
+f2 = open("res_test_pdst2.txt",'w')
+longseq=len(seqall[0])
+for i in range(len(seqall)):
+	ligne=""
+	for j in range(len(seqall)):
+		nbediff=0.0
+		for k in range(longseq):
+			if seqall[i][k]!=seqall[j][k]:
+				nbediff+=1.0
+		if ligne=="":
+			ligne+=("%.4f" % (nbediff/longseq))
+		else:
+			ligne+=(" %.4f" % (nbediff/longseq))
+	f2.write(ligne+'\n')
+
+f2.close()
+
+
+
+##Transitions and Transversions : tran
+
+modif_fichier("test_tran.txt","test_tran2.txt")
+f1 = open("test_tran2.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=1
+while i<= len(text):
+	seqall.append(text[i].rstrip())
+	i+=2
+
+transi=0.0
+transver=0.0
+for i in range(len(seqall[0])):
+	if seqall[0][i]!=seqall[1][i]:
+		if (seqall[0][i]=='A' and seqall[1][i]=='G') or (seqall[0][i]=='G' and seqall[1][i]=='A') or (seqall[0][i]=='C' and seqall[1][i]=='T') or (seqall[0][i]=='T' and seqall[1][i]=='C'):
+			transi+=1.0
+		else:
+			transver+=1.0
+
+print " %.11f" % (transi/transver)
+
+
+
+##Counting Phylogenetic Ancestors : inod
+
+#Chaque noeud 3 arretes
+#Pas de cycle donc seul le 1er et le dernier noeuds ont 2 feuilles
+#Le reste a 2 voisins internes et 1 feuille
+# Donc res : nombre feuilles - 2
+
+
+
+##Introduction to Pattern Matching : trie
+
+f1 = open("test_trie.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=0
+while i< len(text):
+	seqall.append(text[i].rstrip())
+	i+=1
+
+trie=[]
+numero=0
+for i in range(len(seqall[0])):
+	trie.append(i)
+	trie.append(i+1)
+	trie.append(seqall[0][i])
+	numero+=1
+
+print trie
+for i in range(1,len(seqall)):
+	for j in range(len(seqall[i])):
+		if seqall[i][j]!=trie[j*3+2]:
+			numero+=1
+			trie.append(j)
+			trie.append(numero)
+			trie.append(seqall[i][j])
+
+f2=open("res_test_trie.txt",'w')
+while trie!=[]:
+	f2.write(str(trie[0])+" "+str(trie[1])+" "+str(trie[2])+"\n")
+	trie=trie[3:]
+
 f2.close()
 
 
