@@ -763,3 +763,319 @@ f2.close()
 
 
 
+##Error Correction in Reads : corr
+
+modif_fichier("test_corr.txt","test_corr2.txt")
+f1 = open("test_corr2.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=1
+while i<= len(text):
+	seqall.append(text[i].rstrip())
+	i+=2
+
+readuniq=[]
+readmulti=[]
+for i in range(len(seqall)):
+	nbe=0
+	reversi=reverse_complement(seqall[i])
+	for j in range(len(seqall)):
+		if seqall[i]==seqall[j] or seqall[j]==reversi:
+			nbe+=1
+	if nbe!=1:
+		if seqall[i] not in readmulti and reversi not in readmulti:
+			readmulti.append(seqall[i])
+	else:
+		readuniq.append(seqall[i])
+
+f2=open("res_test_corr.txt",'w')
+for i in range(len(readuniq)):
+	for j in range(len(readmulti)):
+		revread=reverse_complement(readmulti[j])
+		disthamm=nbe_substitutions(readuniq[i],readmulti[j])
+		disthammrev=nbe_substitutions(readuniq[i],revread)
+		if disthamm==1:
+			f2.write(readuniq[i]+"->"+readmulti[j]+"\n")
+			break
+		if disthammrev==1:
+			f2.write(readuniq[i]+"->"+revread+"\n")
+			break
+
+f2.close()
+
+
+
+##Introduction to Random Strings : prob
+
+from math import *
+f1 = open("test_prob.txt",'r')
+text=f1.readlines()
+f1.close()
+seq=text[0].rstrip()
+valeur=text[1].rstrip().split(" ")
+nbeGC=0
+for i in range(len(seq)):
+	if seq[i]=='G' or seq[i]=='C':
+		nbeGC+=1
+
+restot=""
+for i in range(len(valeur)):
+	res=nbeGC*log10(0.5*float(valeur[i]))+(len(seq)-nbeGC)*log10(0.5*(1-float(valeur[i])))
+	restronq="%.3f" % res
+	restot+=restronq+" "
+
+print restot
+
+
+
+##Speeding Up Motif Finding : kmp
+
+modif_fichier("test_kmp.txt","test_kmp2.txt")
+f1 = open("test_kmp2.txt",'r')
+text=f1.readlines()
+f1.close()
+seq=text[1].rstrip()
+res=""
+for i in range(len(seq)):
+	valeur=0
+	seqprefix=seq[:i+1]
+	if range(len(seqprefix))[-1]>11:
+		for j in reversed(range(10)):
+			if seqprefix[:j]==seqprefix[-j:]:
+				valeur=len(seqprefix[-j:])
+				break
+	
+	else:
+		for j in reversed(range(len(seqprefix))):
+			if seqprefix[:j]==seqprefix[-j:]:
+				valeur=len(seqprefix[-j:])
+				break
+	res+=str(valeur)+" "
+
+f2=open("res_test_kmp.txt",'w')
+f2.write(res.rstrip())
+f2.close()
+
+
+
+##Enumerating Gene Orders : perm
+
+nbe=6
+nbepermut=fact(nbe)
+def permut(param):
+	if param:
+		r=[]
+		h=[]
+		for x in param:
+			if x not in h:
+				ts = param[:]
+				ts.remove(x)
+				for p in permut(ts):
+					r.append([x]+p)
+			h.append(x)
+		return r
+	else:
+		return [[]]
+
+#rep=permut(range(1,nbe+1))
+#f1=open("res_test_perm.txt",'w')
+#f1.write(str(nbepermut)+"\n")
+#for i in range(len(rep)):
+#	ligne=""
+#	for j in range(len(rep[i])):
+#		ligne+=str(rep[i][j])+" "
+#	f1.write(ligne.rstrip()+"\n")
+
+#f1.close()
+
+
+
+##Enumerating Oriented Gene Orderings : sign
+
+from itertools import *
+f1=open("res_test_sign.txt",'w')
+nbe=4
+listenbe=range(1,nbe+1)
+listenbeall=[]
+
+def permutall(param):
+    for signed in product(*[[-a,a] for a in param]):
+        for p in permutations(signed):
+            yield p
+
+listenbeall=list(permutall(listenbe))
+
+f1.write(str(len(listenbeall))+"\n")
+for i in range(len(listenbeall)):
+	ligne=""
+	for j in range(len(listenbeall[i])):
+		ligne+=str(listenbeall[i][j])+" "
+	f1.write(ligne.rstrip()+"\n")
+
+f1.close()
+
+
+
+##Longest Increasing Subsequence : lgis
+
+f1 = open("test_lgis_2.txt",'r')
+text=f1.readlines()
+f1.close()
+longseq=int(text[0].rstrip())
+seq=text[1].rstrip().split(" ")
+listeseq=[]
+for i in range(len(seq)):
+	listeseq.append(int(seq[i]))
+
+#def test(listeseq):
+
+listeincrea=[]
+listedecrea=[]
+for i in range(len(listeseq)):
+	tmpincrea=[]
+	tmpdecrea=[]
+	tmpincrea.append(listeseq[i])
+	tmpdecrea.append(listeseq[i])
+	for j in range(1,len(listeseq)):
+		tmp2increa=tmpincrea
+		if listeseq[j]>tmp2increa[-1]:
+			tmp2increa.append(listeseq[j])
+		if listeseq[j]<tmpdecrea[-1]:
+			tmpdecrea.append(listeseq[j])
+	
+	if len(tmpincrea)>len(listeincrea):
+		listeincrea=tmpincrea
+	if len(tmpdecrea)>len(listedecrea):
+		listedecrea=tmpdecrea
+
+listeincrea
+
+
+#	return listeincrea
+
+
+
+##Calculating Expected Offspring : iev
+
+test2="1 0 0 1 0 1"
+test="19633 18852 19974 16088 17670 19529"
+vals=test.split(" ")
+valeurs=[]
+for i in range(len(vals)):
+	valeurs.append(int(vals[i]))
+
+res=(1.0*valeurs[0]+1.0*valeurs[1]+1.0*valeurs[2]+0.75*valeurs[3]+0.5*valeurs[4])*2
+
+print res
+
+
+
+##Enumerating k-mers Lexicographically : lexf
+
+f1=open("test_lexf.txt",'r')
+text=f1.readlines()
+f1.close()
+seq=text[0].rstrip().split(" ")
+valeur=int(text[1])
+
+
+from itertools import product
+res=list(product(seq, repeat=valeur))
+f2=open("res_test_lexf.txt",'w')
+for i in range(len(res)):
+	ligne=""
+	for j in range(len(res[i])):
+		ligne+=res[i][j]
+	f2.write(ligne+"\n")
+
+f2.close()
+
+
+#
+def lexf(seq,valeur,ligne,numero):
+	nbe=valeur
+	while nbe>1:
+		ligne+=seq[numero]
+		nbe-=1
+	for i in range(len(seq)):
+		ligne+=seq[i]
+		print ligne
+		ligne=ligne[:-1]
+	ligne=""
+	if numero<=valeur:
+		numero+=1
+		lexf(seq,valeur,ligne,numero)
+
+#lexf(seq,valeur,ligne="",numero=0)
+
+
+	
+##k-Mer Composition : kmer
+
+modif_fichier("test_kmer.txt","test_kmer2.txt")
+f1 = open("test_kmer2.txt",'r')
+text=f1.readlines()
+f1.close()
+seqall=[]
+i=1
+while i<= len(text):
+	seqall.append(text[i].rstrip())
+	i+=2
+
+from itertools import product
+res=list(product(['A','C','G','T'], repeat=4))
+kmersalpha=[]
+for i in range(len(res)):
+	ligne=""
+	for j in range(len(res[i])):
+		ligne+=res[i][j]
+	kmersalpha.append(ligne)
+
+stroccu=""
+for i in range(len(kmersalpha)):
+	posikmers=pos_motifs_repetes(seqall[0],kmersalpha[i]).rstrip()
+	if posikmers=="":
+		stroccu+="0 "
+	else:
+		nbeoccu=len(posikmers.split(" "))
+		stroccu+=str(nbeoccu)+" "
+
+stroccu.rstrip()
+
+
+
+##Ordering Strings of Varying Length Lexicographically : lexv
+
+f1=open("test_lexv.txt",'r')
+text=f1.readlines()
+f1.close()
+seq=text[0].rstrip().split(" ")
+valeur=int(text[1])
+
+
+from itertools import product
+lignes=[]
+for k in range(1,valeur+1):
+	res=list(product(seq, repeat=k))
+	lignes.append(res)
+
+lignes
+
+f2=open("res_test_lexf.txt",'w')
+
+numero=0
+for i in range(len(lignes)):
+	ligne=""
+	while numero==i:
+		for j in range(len(lignes[i])):
+			ligne+=res[i][numero]
+		numero+=1
+		print ligne
+
+
+f2.close()
+
+
+
+
